@@ -32,7 +32,7 @@ export const textMessageController=async(req,res)=>{
             ],
         });
         const reply={...choices[0].message,timestamp:Date.now(),isImage:false}
-        res.json({sucees:true,reply})
+        res.json({success:true,reply})
 
         chat.messages.push(reply)
         await chat.save()
@@ -78,7 +78,11 @@ export const imageMessageController =async (req,res)=>{
         await chat.save()
         await User.updateOne({_id:userId},{$inc:{credits:-2}}) 
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
+        console.log(error.response.status)
+        if (error.response && error.response.status === 403) {
+          return res.json({success:false,message:"AI image limit reached."})  
+        }
         res.json({success:false,message:error.message})
     }
 }
